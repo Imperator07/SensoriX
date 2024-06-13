@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+      build:
+        context: .
+        dockerfile: Dockerfile  # <--- This line is correct
+      container_name: sensorix_web
+      ports:
+        - "5000:5000"
+      depends_on:
+        - mongo
+      environment:
+        - FLASK_ENV=development
+        - MONGO_URI=mongodb://mongo:27017/sensorix_db
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_volume:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: abcd1234!
+
+
+volumes:
+  mongo_volume:
