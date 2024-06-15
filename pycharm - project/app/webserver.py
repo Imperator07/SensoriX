@@ -4,7 +4,45 @@ from flask_mongoengine2 import MongoEngine
 from mongoengine import Document, EmbeddedDocument
 from mongoengine.fields import DateTimeField, IntField, FloatField
 from json import JSONEncoder
-import datetime
+from random import randint
+from datetime import datetime
+
+
+
+# TODO: put in functions.py
+#region helper functions
+# create_entries_dictionary: calculates average and generalizes the rssi/watt/celsius into "unit"
+def create_entries_dictionary(entries, unit_field):
+    formatted_entries = []
+    value_sum = 0
+    value_count = 0
+    for entry in entries:
+        value_sum += getattr(entry, unit_field)
+        value_count += 1
+        average = value_sum / value_count
+        formatted_entries.append({
+            'timestamp': entry.timestamp,
+            'unit': getattr(entry, unit_field),
+            'average': average
+        })
+    return formatted_entries
+
+def add_wifi():
+    wifi = Wifi(timestamp=datetime.now(), rssi=randint(-100,-50))
+    wifi.save()
+def add_power():
+    power = Power(timestamp=datetime.now(), watt=randint(0,99))
+    power.save()
+def add_temperature():
+    temperature = Temperature(timestamp=datetime.now(), celsius=randint(-10,40))
+    temperature.save()
+#endregion
+
+
+
+
+
+
 
 app = Flask(__name__)
 app.config['MONGODB_SETTINGS'] = {
@@ -21,16 +59,16 @@ db = MongoEngine(app)
 
 class Wifi(Document):
     timestamp = DateTimeField()
-    RSSI = IntField()
-    average = FloatField()
+    rssi = IntField()
+    average = FloatField(required=False)
 class Power(Document):
     timestamp = DateTimeField()
     watt = IntField()
-    average = FloatField()
+    average = FloatField(required=False)
 class Temperature(Document):
     timestamp = DateTimeField()
     celsius = IntField()
-    average = FloatField()
+    average = FloatField(required=False)
 
 
 
@@ -41,46 +79,30 @@ def index():
 
 @app.route("/wifi")
 def wifi():
-    wifi = Wifi(timestamp=datetime.datetime.now(), RSSI=420, average=6.9)
-    wifi.save()
-    print("Wifi entry added: {}".format(wifi.to_json()))
-    return render_template("index.html")
+    add_wifi()
+    entries = Wifi.objects.all()
+    formatted_entries = create_entries_dictionary(entries, 'rssi')
+    return render_template('output.html', unit='RSSI', entries=formatted_entries)
+
+
 
 @app.route("/power")
 def power():
-    power = Power(timestamp=datetime.datetime.now(), watt=420, average=6.9)
-    power.save()
-    print("Power entry added: {}".format(power.to_json()))
-    return render_template("index.html")
+    add_power()
+    entries = Power.objects.all()
+    entries = Power.objects.all()
+    formatted_entries = create_entries_dictionary(entries, 'watt')
+    return render_template('output.html', unit='Watt', entries=formatted_entries)
+
+
 
 @app.route("/temperature")
 def temperature():
-    temperature = Temperature(timestamp=datetime.datetime.now(), celsius=420, average=6.9)
-    temperature.save()  # This saves the document to the database
-    print("temperature entry added: {}".format(temperature.to_json()))
-    return render_template("index.html")
-
-'''
-def add_student():
-    if(request.method == 'GET'):
-        groups = Group.objects.all()
-        return render_template("add_student.html", groups=groups)
-    else:
-        student = Student(firstname=request.form.get("firstname"), lastname=request.form.get("lastname"), birthday=request.form.get("birthday"))
-        group = Group(id=request.form.get("groupId"))
-        student.group = group
-        address = Address(street=request.form.get("street"), city=request.form.get("city"), zip=request.form.get("zip"))
-        student.address = address
-        student.save()
-
-        groups = Group.objects.all()
-        return render_template("add_student.html", groups=groups)
-
-
-def get_students():
-    students = Student.objects.all()
-    return render_template("get_students.html", students=students)
-'''
+    add_temperature()
+    entries = Temperature.objects.all()
+    entries = Temperature.objects.all()
+    formatted_entries = create_entries_dictionary(entries, 'celsius')
+    return render_template('output.html', unit='celsius', entries=formatted_entries)
 
 
 app.run(host='0.0.0.0', port=5000)

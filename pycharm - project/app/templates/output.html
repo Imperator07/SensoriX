@@ -1,0 +1,25 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<div class="container">
+        <h1>Table of Entries</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th> {{ unit }}</th>
+                    <th>Average</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        <td>{{ entry.timestamp }}</td>
+                        <td>{{ entry.unit }}</td>
+                        <td>{{ "%.2f"|format(entry.average) }}</td> <!-- Limiting to 2 decimal places -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
