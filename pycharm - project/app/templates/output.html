@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container">
-        <h1>Table of Entries</h1>
+        <h1>Table of Entries : {{ measurement }}</h1>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -16,7 +16,7 @@
                     <tr>
                         <td>{{ entry.timestamp }}</td>
                         <td>{{ entry.unit }}</td>
-                        <td>{{ "%.2f"|format(entry.average) }}</td> <!-- Limiting to 2 decimal places -->
+                        <td>{{ entry.average }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

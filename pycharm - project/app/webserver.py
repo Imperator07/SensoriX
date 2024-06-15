@@ -12,18 +12,18 @@ from datetime import datetime
 # TODO: put in functions.py
 #region helper functions
 # create_entries_dictionary: calculates average and generalizes the rssi/watt/celsius into "unit"
-def create_entries_dictionary(entries, unit_field):
+def create_entries_dictionary(entries, unit_field, short_unit_field):
     formatted_entries = []
     value_sum = 0
     value_count = 0
     for entry in entries:
-        value_sum += getattr(entry, unit_field)
+        value_sum += getattr(entry, unit_field) #generalized version of entry.rssi/watt/celsius
         value_count += 1
         average = value_sum / value_count
         formatted_entries.append({
             'timestamp': entry.timestamp,
-            'unit': getattr(entry, unit_field),
-            'average': average
+            'unit': str(getattr(entry, unit_field)) + short_unit_field, #formatted with the unit symbol
+            'average': str(round(average, 2)) + short_unit_field
         })
     return formatted_entries
 
@@ -37,8 +37,6 @@ def add_temperature():
     temperature = Temperature(timestamp=datetime.now(), celsius=randint(-10,40))
     temperature.save()
 #endregion
-
-
 
 
 
@@ -81,9 +79,8 @@ def index():
 def wifi():
     add_wifi()
     entries = Wifi.objects.all()
-    formatted_entries = create_entries_dictionary(entries, 'rssi')
-    return render_template('output.html', unit='RSSI', entries=formatted_entries)
-
+    formatted_entries = create_entries_dictionary(entries, "rssi", " dBm")
+    return render_template('output.html', measurement="Wifi-Traffic", unit='RSSI', entries=formatted_entries)
 
 
 @app.route("/power")
@@ -91,9 +88,8 @@ def power():
     add_power()
     entries = Power.objects.all()
     entries = Power.objects.all()
-    formatted_entries = create_entries_dictionary(entries, 'watt')
-    return render_template('output.html', unit='Watt', entries=formatted_entries)
-
+    formatted_entries = create_entries_dictionary(entries, "watt", " W")
+    return render_template('output.html', measurement="Power Generation", unit='Watt', entries=formatted_entries)
 
 
 @app.route("/temperature")
@@ -101,8 +97,8 @@ def temperature():
     add_temperature()
     entries = Temperature.objects.all()
     entries = Temperature.objects.all()
-    formatted_entries = create_entries_dictionary(entries, 'celsius')
-    return render_template('output.html', unit='celsius', entries=formatted_entries)
+    formatted_entries = create_entries_dictionary(entries, "celsius", "° C")
+    return render_template('output.html', measurement="Temperature", unit='celsius', entries=formatted_entries)
 
 
 app.run(host='0.0.0.0', port=5000)
