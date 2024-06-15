@@ -1,8 +1,8 @@
 FROM python:3.12-alpine3.19
 
-WORKDIR /app/webserver
+WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
-COPY webserver.py .
+COPY app/ .
 
 CMD ["python", "webserver.py"]
