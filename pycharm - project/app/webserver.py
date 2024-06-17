@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from sqlalchemy.sql.functions import random
 
+
+from sensor_data_client import SensorDataClient
+
 #region helper functions
 # create_entries_dictionary: calculates average and generalizes the rssi/watt/celsius into "unit"
 data = {
@@ -44,18 +47,28 @@ def create_entries_dictionary(entries, unit_field, short_unit_field):
     return formatted_entries
 
 def add_wifi():
-    wifi = Wifi(timestamp=datetime.now(), rssi=randint(-100,-50))
+    timestamp_rssi, rssi_value = sensor_client.get_latest_rssi()
+    wifi = Wifi(timestamp=timestamp_rssi, rssi=rssi_value)
     wifi.save()
 def add_power():
-    power = Power(timestamp=datetime.now(), watt=randint(0,99))
+    timestamp_power, power_value = sensor_client.get_latest_pv_yield_power()
+
+
+
+
+
+
+    power = Power(timestamp=timestamp_power, watt=power_value)
     power.save()
 def add_temperature():
-    temperature = Temperature(timestamp=datetime.now(), celsius=randint(-10,40))
+    timestamp_temperature, temperature_value = sensor_client.get_latest_temperature()
+    temperature = Temperature(timestamp=timestamp_temperature, celsius=temperature_value)
     temperature.save()
 #endregion
 
 
 
+sensor_client = SensorDataClient()
 
 
 app = Flask(__name__)
