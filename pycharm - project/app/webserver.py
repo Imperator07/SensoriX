@@ -98,7 +98,7 @@ def temperature():
     entries = Temperature.objects.all()
     entries = Temperature.objects.all()
     formatted_entries = create_entries_dictionary(entries, "celsius", "° C")
-    return render_template('output.html', measurement="Temperature", unit='celsius', entries=formatted_entries)
+    return render_template('output.html', measurement="Temperature", unit='Celsius', entries=formatted_entries)
 
 
 app.run(host='0.0.0.0', port=5000)
