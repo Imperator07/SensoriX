@@ -1,14 +1,33 @@
+
 from flask import Flask, request, render_template
+import io
+
+from flask import Flask
+from flask import Flask, request, render_template, send_file
 from flask_mongoengine2 import MongoEngine
 from mongoengine import Document
 from mongoengine.fields import DateTimeField, IntField, FloatField
 from random import randint
 from datetime import datetime
-
-
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from sqlalchemy.sql.functions import random
 
 #region helper functions
 # create_entries_dictionary: calculates average and generalizes the rssi/watt/celsius into "unit"
+data = {
+    "timestamps": [],
+    "values": []
+}
+
+def fetch_sensor_data():
+    now = datetime.now()
+    value = 1
+    data["timestamps"].append(now)
+    data["values"].append(value)
+    if len(data["timestamps"]) > 10:#Keep only the latest 10 data points
+        data["timestamps"].pop(0)
+        data["values"].pop(0)
 def create_entries_dictionary(entries, unit_field, short_unit_field):
     formatted_entries = []
     value_sum = 0
@@ -96,6 +115,30 @@ def temperature():
     entries = Temperature.objects.all()
     formatted_entries = create_entries_dictionary(entries, "celsius", "° C")
     return render_template('output.html', measurement="Temperature", unit='Celsius', entries=formatted_entries)
+
+@app.route('/plot.png')
+def plot_png():
+    fetch_sensor_data()  # Update data from sensors
+
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(data["timestamps"], data["values"])
+
+    # Format the x-axis to show timestamps properly
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+    fig.autofmt_xdate()  # Rotate date labels
+
+    ax.set_title('Real-Time Sensor Data')
+    ax.set_xlabel('Timestamp')
+    ax.set_ylabel('Value')
+    ax.grid(True)
+
+    # Save it to a bytes buffer
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    return send_file(buf, mimetype='image/png')
+
 
 
 app.run(host='0.0.0.0', port=5000)
