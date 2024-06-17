@@ -1,17 +1,12 @@
-
-from flask import Flask, request, render_template
 import io
 
-from flask import Flask
 from flask import Flask, request, render_template, send_file
 from flask_mongoengine2 import MongoEngine
 from mongoengine import Document
 from mongoengine.fields import DateTimeField, IntField, FloatField
-from random import randint
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from sqlalchemy.sql.functions import random
 
 
 from sensor_data_client import SensorDataClient
