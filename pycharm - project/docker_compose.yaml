@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: sensorix_web
+    networks:
+      - sensorix_network
     ports:
       - "5000:5000"
     depends_on:
@@ -16,6 +18,8 @@ services:
   mongo:
     image: mongo:latest
     container_name: sensorix_db
+    networks:
+      - sensorix_network
     ports:
       - "27017:27017"
     volumes:
@@ -24,6 +28,9 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: abcd1234!
 
-
 volumes:
   mongo_volume:
+
+networks:
+  sensorix_network:
+    driver: bridge

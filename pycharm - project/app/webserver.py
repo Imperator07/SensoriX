@@ -1,15 +1,12 @@
-from flask import Flask
 from flask import Flask, request, render_template
 from flask_mongoengine2 import MongoEngine
-from mongoengine import Document, EmbeddedDocument
+from mongoengine import Document
 from mongoengine.fields import DateTimeField, IntField, FloatField
-from json import JSONEncoder
 from random import randint
 from datetime import datetime
 
 
 
-# TODO: put in functions.py
 #region helper functions
 # create_entries_dictionary: calculates average and generalizes the rssi/watt/celsius into "unit"
 def create_entries_dictionary(entries, unit_field, short_unit_field):
@@ -45,7 +42,7 @@ def add_temperature():
 app = Flask(__name__)
 app.config['MONGODB_SETTINGS'] = {
     "db": "sensorix_db",
-    "host": "",
+    "host": "10.115.2.53",
     "port": 27017,
     "username": "admin",
     "password": "abcd1234!"
