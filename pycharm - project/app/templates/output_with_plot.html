@@ -1,0 +1,36 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<div class="container">
+        <h1>Table of Entries : {{ measurement }}</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th> {{ unit }}</th>
+                    <th>Average</th>
+                </tr>
+            </thead>
+            <thead>
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            </thead>
+            <tbody>
+                <h1>Chart</h1>
+                <img id="plot" src="{{ url_for('plot_png') }}" alt="Chart">
+                <script type="text/javascript">
+                    function updatePlot() {
+                    $("#plot").attr("src", "{{ url_for('plot_png') }}?" + new Date().getTime());
+                    }
+                    setInterval(updatePlot, 5000);// Update every 5 seconds
+                </script>
+                {% for entry in entries %}
+                    <tr>
+                        <td>{{ entry.timestamp }}</td>
+                        <td>{{ entry.unit }}</td>
+                        <td>{{ entry.average }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
