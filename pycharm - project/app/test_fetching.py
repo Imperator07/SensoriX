@@ -1,93 +1,109 @@
+import DateTime
+
 from sensor_data_client import SensorDataClient
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 sensor_client = SensorDataClient()
 
-data = {
-    "timestamps": {
-        "time_wifi": [],
-        "time_power": [],
-        "time_temp": []
-    },
-    "values": {
-        "value_wifi": [],
-        "value_power": [],
-        "value_temp": []
-    },
-    "averages": {
-        "avg_wifi": [],
-        "avg_power": [],
-        "avg_temp": []
-    }
+wifi_data = {
+        "timestamp": [],
+        "rssi": [],
+        "average": []
+}
+power_data = {
+        "timestamp": [],
+        "watt": [],
+        "average": []
+}
+temperature_data = {
+        "timestamp": [],
+        "celsius": [],
+        "average": []
 }
 
 
-
 # gets data and saves them in a accessible data-structure
-def fetch_sensor_data():                                                                                                # TODO: replace the 1 values with the actual fetching with the api
-    # get data
-    timestamp_rssi, rssi_value, timestamp_power, power_value, timestamp_temperature, temperature_value = 1,1, 1,1, 1,1
-
-    '''timestamp_rssi, rssi_value = sensor_client.get_latest_rssi()
-    timestamp_power, power_value = sensor_client.get_latest_pv_yield_power()
-    timestamp_temperature, temperature_value = sensor_client.get_latest_temperature()'''
-    # append timestamps
-    data["timestamps"]["time_wifi"].append(timestamp_rssi)
-    data["timestamps"]["time_power"].append(timestamp_power)
-    data["timestamps"]["time_temp"].append(timestamp_temperature)
-    # append values
-    data["values"]["value_wifi"].append(rssi_value)
-    data["values"]["value_power"].append(power_value)
-    data["values"]["value_temp"].append(temperature_value)
-    # calculate averages
-
-    data["averages"]["avg_wifi"].append(get_entry_average(data["values"]["value_wifi"]))
-    data["averages"]["avg_power"].append(get_entry_average(data["values"]["value_power"]))
-    data["averages"]["avg_temp"].append(get_entry_average(data["values"]["value_temp"]))
-
+def fetch_sensor_data(data_type):
+        match data_type:
+                case "wifi":
+                        timestamp_rssi, rssi_value = sensor_client.get_latest_rssi()
+                        wifi_data["timestamp"].append(DateTime.DateTime(timestamp_rssi))
+                        wifi_data["rssi"].append(rssi_value)
+                        wifi_data["average"].append(get_entry_average(wifi_data["rssi"]))
+                case "power":
+                        timestamp_watt, watt_value = sensor_client.get_latest_pv_yield_power()
+                        power_data["timestamp"].append(DateTime.DateTime(timestamp_watt))
+                        power_data["watt"].append(watt_value)
+                        power_data["average"].append(get_entry_average(power_data["watt"]))
+                case "temperature":
+                        timestamp_celsius, celsius_value = sensor_client.get_latest_temperature()
+                        temperature_data["timestamp"].append(DateTime.DateTime(timestamp_celsius))
+                        temperature_data["celsius"].append(celsius_value)
+                        temperature_data["average"].append(get_entry_average(temperature_data["celsius"]))
 
 
 def get_entry_average(entries):
-    entry_averages = []
-    value_sum = 0
-    value_count = 0
-    for entry in entries:
-        value_sum += entry # sums up the value for each unit
-        value_count += 1                        # counts how many values have been added
-        average = value_sum / value_count       # calculates average value so far
-        entry_averages.append(round(average, 2))
-    return entry_averages
-
-
-
-
+        value_sum = 0
+        value_count = 0
+        average = None
+        for entry in entries:
+                value_sum += entry  # sums up the value for each unit
+                value_count += 1  # counts how many values have been added
+                average = value_sum / value_count  # calculates average value so far
+        return average
 
 
 class Wifi():
-    def __init__(self, timestamp, rssi):
-        self.timestamp = timestamp
-        self.rssi = rssi
-    timestamp = 0
-    rssi = 0
-    average = 0
+        def __init__(self, timestamp, rssi):
+                self.timestamp = timestamp
+                self.rssi = rssi
+
+        timestamp = 0
+        rssi = 0
+        average = 0
+
+
 class Power():
-    def __init__(self, timestamp, watt):
-        self.timestamp = timestamp
-        self.rssi = watt
-    timestamp = 0
-    watt = 0
-    average = 0
+        def __init__(self, timestamp, watt):
+                self.timestamp = timestamp
+                self.rssi = watt
+
+        timestamp = 0
+        watt = 0
+        average = 0
+
+
 class Temperature():
-    def __init__(self, timestamp, celsius):
-        self.timestamp = timestamp
-        self.rssi = celsius
-    timestamp = 0
-    celsius = 0
-    average = 0
+        def __init__(self, timestamp, celsius):
+                self.timestamp = timestamp
+                self.rssi = celsius
+
+        timestamp = 0
+        celsius = 0
+        average = 0
 
 
+from time import sleep
+
+fetch_sensor_data("wifi")
+fetch_sensor_data("power")
+fetch_sensor_data("temperature")
+sleep(120)
+fetch_sensor_data("wifi")
+fetch_sensor_data("power")
+fetch_sensor_data("temperature")
 
 
-fetch_sensor_data()
-print(data)
+def print_data_elements(data_dict, name):
+        print(f"{name} Data:")
+        for key, values in data_dict.items():
+                print(f"{key.capitalize()}:")
+                for i, value in enumerate(values):
+                        print(f"  {i + 1}: {value}")
+        print()
+
+
+print_data_elements(wifi_data, "Wifi")
+print_data_elements(power_data, "Power")
+print_data_elements(temperature_data, "Temperature")

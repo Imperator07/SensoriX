@@ -21,7 +21,7 @@
                     function updatePlot() {
                     $("#plot").attr("src", "{{ url_for('plot_png') }}?" + new Date().getTime());
                     }
-                    setInterval(updatePlot, 5000);// Update every 5 seconds
+                    setInterval(updatePlot, 500);// Update every 5 seconds
                 </script>
                 {% for entry in entries %}
                     <tr>

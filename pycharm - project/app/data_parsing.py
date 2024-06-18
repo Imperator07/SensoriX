@@ -10,7 +10,7 @@ timestamp_temperature, temperature_value = sensor_client.get_latest_temperature(
 timestamp_power, power_value = sensor_client.get_latest_pv_yield_power()
 
 
-while True:
-    print(f"Latest RSSI value: {rssi_value} at {timestamp_rssi}")
-    print(f"Latest temperature value: {temperature_value} at {timestamp_temperature}")
-    print(f"Latest power value: {power_value} at {timestamp_temperature}")
+print(f"Latest RSSI value: {rssi_value} at {timestamp_rssi}")
+print(f"Latest temperature value: {temperature_value} at {timestamp_temperature}")
+print(f"Latest power value: {power_value} at {timestamp_temperature}")
+print(timestamp_rssi)
