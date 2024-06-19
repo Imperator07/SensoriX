@@ -2,12 +2,12 @@
 
 {% block content %}
 <div class="container">
-        <h1>Table of Entries : {{ measurement }}</h1>
+        <h1>Table of Entries : {{ unit_data["measurement_name"] }}</h1>
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Time</th>
-                    <th> {{ unit }}</th>
+                    <th> {{ unit_data["table_header_unit"] }}</th>
                     <th>Average</th>
                 </tr>
             </thead>
@@ -16,17 +16,26 @@
             </thead>
             <tbody>
                 <h1>Chart</h1>
-                <img id="plot" src="{{ url_for('plot_png') }}" alt="Chart">
+                <button onclick="updatePlot('wifi')">WiFi</button>
+                <button onclick="updatePlot('power')">Power</button>
+                <button onclick="updatePlot('temperature')">Temperature</button>
+
+                <img id="plot" src="{{ url_for('plot_png', type='wifi') }}" alt="Chart">
+
                 <script type="text/javascript">
-                    function updatePlot() {
-                    $("#plot").attr("src", "{{ url_for('plot_png') }}?" + new Date().getTime());
+                    function updatePlot(dataType) {
+                        $("#plot").attr("src", "{{ url_for('plot_png') }}?type=" + dataType + "&" + new Date().getTime());
                     }
-                    setInterval(updatePlot, 500);// Update every 5 seconds
+
+                    setInterval(function() {
+                        let currentType = new URL($("#plot").attr("src")).searchParams.get("type");
+                        updatePlot(currentType);
+                    }, 500); // Update every 5 seconds
                 </script>
                 {% for entry in entries %}
                     <tr>
                         <td>{{ entry.timestamp }}</td>
-                        <td>{{ entry.unit }}</td>
+                        <td>{{ entry.unit }} {{ unit_data["unit"] }}</td>
                         <td>{{ entry.average }}</td>
                     </tr>
                 {% endfor %}

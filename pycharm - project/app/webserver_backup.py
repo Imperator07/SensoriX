@@ -1,9 +1,8 @@
 # TODO: find a way to parse the data type to the plot function
 
 import io
-import random
 
-from flask import Flask, request, render_template, send_file, make_response
+from flask import Flask, request, render_template, send_file
 from flask_mongoengine2 import MongoEngine
 from mongoengine import Document
 from mongoengine.fields import DateTimeField, IntField, FloatField
@@ -55,10 +54,7 @@ temperature_data = {
 def fetch_sensor_data(data_type):
         match data_type:
                 case "wifi":
-                        # TODO not permanently: test realtime updates with random
-                        #timestamp_rssi, rssi_value = sensor_client.get_latest_rssi()
-                        timestamp_rssi = datetime.now()
-                        rssi_value = random.randint(-100,-50)
+                        timestamp_rssi, rssi_value = sensor_client.get_latest_rssi()
                         wifi_data["timestamp"].append(timestamp_rssi)
                         wifi_data["rssi"].append(rssi_value)
                         wifi_data["average"].append(get_entry_average(wifi_data["rssi"]))
@@ -74,7 +70,7 @@ def fetch_sensor_data(data_type):
 
 
                         # we dont want to show the entire history on the graph so we remove the entries older than 15
-                        if len(wifi_data["timestamp"]) >= 150:
+                        if len(wifi_data["timestamp"]) >= 15:
                                 length = len(wifi_data["timestamp"])
                                 print(f"removed last index because length was: {length}")
                                 wifi_data["timestamp"].pop(0)
@@ -165,35 +161,40 @@ def power():
 @app.route("/temperature")
 def temperature():
     entries = Temperature.objects.all()
-    entries = Temperature.objects.all()
-    unit_data = {
-            "data_type": "temperature",
-            "measurement_name": "Temperature",
-            "table_header_unit": "Celsius",
-            "unit": "°C"
-    }
-    return render_template('output_with_plot.html', unit_data=unit_data, entries=entries)
+    return render_template('output_with_plot.html', measurement="Temperature", measure='Celsius', unit="°C", entries=entries)
+
 
 
 @app.route('/plot.png')
-def plot_png():
-        data_type = request.args.get('type', default='wifi', type=str)
+def plot_png(data_type):
+    fetch_sensor_data(data_type)
 
-        fig, ax = plt.subplots()
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-        fetch_sensor_data(data_type)
-        match data_type:
-                case "wifi":
-                        ax.plot(wifi_data["timestamp"], wifi_data["rssi"])
-                case "power":
-                        ax.plot(power_data["timestamp"], power_data["watt"])
-                case "temperature":
-                        ax.plot(temperature_data["timestamp"], temperature_data["celsius"])
+    match data_type:
+            case "wifi":
+                    ax.plot(wifi_data["timestamp"], wifi_data["rssi"])
+            case "power":
+                    ax.plot(power_data["timestamp"], power_data["watt"])
+            case "temperature":
+                    ax.plot(temperature_data["timestamp"], temperature_data["celsius"])
 
-        output = io.BytesIO()
-        fig.savefig(output, format='png')
-        output.seek(0)
-        return make_response(output.getvalue(), {'Content-Type': 'image/png'})
+    # Format the x-axis to show timestamps properly
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+    fig.autofmt_xdate()  # Rotate date labels
+
+    ax.set_title('Real-Time Sensor Data')
+    ax.set_xlabel('Timestamp')
+    ax.set_ylabel('Value')
+    ax.grid(True)
+
+    # Save it to a bytes buffer
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    return send_file(buf, mimetype='image/png')
+
 
 
 app.run(host='0.0.0.0', port=5000)
