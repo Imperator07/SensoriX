@@ -1,8 +1,15 @@
 /* base.css */
 
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 .sidebar {
     width: 250px;
+    height: 100vh;
     transition: width 0.3s;
+    overflow-y: auto;
 }
 
 .sidebar.collapsed {
@@ -13,6 +20,7 @@
 .content {
     flex-grow: 1;
     transition: margin-left 0.3s;
+    overflow-y: auto; /* Ensure content scrolls if too long */
 }
 
 .content.expanded {

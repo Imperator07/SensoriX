@@ -1,0 +1,44 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Table of Entries : {{ unit_data["heading"] }}</h1>
+
+    <div id="plot-container">
+        <img id="plot-img" src="" alt="Plot Image">
+    </div>
+
+    <script>
+        function updatePlot() {
+            var pathArray = window.location.pathname.split('/'); //get url
+            var plotType = pathArray[1]; // Get the second element in the path array
+            $('#plot-img').attr('src', '/plot/' + plotType + '?' + new Date().getTime()); // Append timestamp to URL to prevent caching
+        }
+
+        // Call updatePlot initially
+        updatePlot();
+
+        // Call updatePlot every 5 seconds (adjust as needed)
+        setInterval(updatePlot, 1000);
+    </script>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>{{ unit_data["table_head"] }}</th>
+                <th>Average</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.timestamp }}</td>
+                    <td>{{ entry.unit }} {{ unit_data["unit"] }}</td>
+                    <td>{{ entry.average | round(2) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
