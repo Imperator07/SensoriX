@@ -10,7 +10,7 @@ from sensor_data_client import SensorDataClient
 
 
 MAX_PLOT_POINT_AMOUNT = 15
-
+DECIMAL_PRECISION = 2
 
 
 
@@ -20,7 +20,7 @@ sensor_client = SensorDataClient()
 app = Flask(__name__)
 app.config['MONGODB_SETTINGS'] = {
     "db": "sensorix_db",
-    "host": "10.115.2.53",
+    "host": "",#"10.115.2.53",
     "port": 27017,
     "username": "admin",
     "password": "abcd1234!"
@@ -68,9 +68,9 @@ def fetch_sensor_data(data_type):
             wifi_data["timestamp_now"].append(datetime.now())
             wifi_data["timestamp_sensor"].append(timestamp_rssi)
             wifi_data["rssi"].append(rssi_value)
-            wifi_data["average"].append(get_entry_average(wifi_data["rssi"]))
+            wifi_data["average"].append(round(get_entry_average(wifi_data["rssi"]), DECIMAL_PRECISION))
 
-            output_data(wifi_data, "fetching wifi:")
+            #output_data(wifi_data, "fetching wifi:")
 
 
 
@@ -85,9 +85,9 @@ def fetch_sensor_data(data_type):
             power_data["timestamp_now"].append(datetime.now())
             power_data["timestamp_sensor"].append(timestamp_watt)
             power_data["watt"].append(watt_value)
-            power_data["average"].append(get_entry_average(power_data["watt"]))
+            power_data["average"].append(round(get_entry_average(power_data["watt"]), DECIMAL_PRECISION))
 
-            output_data(wifi_data, "fetching power:")
+            #output_data(wifi_data, "fetching power:")
 
 
             if len(power_data["timestamp_sensor"]) > 1 and power_data["timestamp_sensor"][-1] != power_data["timestamp_sensor"][-2]:
@@ -101,9 +101,9 @@ def fetch_sensor_data(data_type):
             temperature_data["timestamp_now"].append(datetime.now())
             temperature_data["timestamp_sensor"].append(timestamp_celsius)
             temperature_data["celsius"].append(celsius_value)
-            temperature_data["average"].append(get_entry_average(temperature_data["celsius"]))
+            temperature_data["average"].append(round(get_entry_average(temperature_data["celsius"]), DECIMAL_PRECISION))
 
-            output_data(wifi_data, "fetching temperature:")
+            #output_data(wifi_data, "fetching temperature:")
 
 
 
